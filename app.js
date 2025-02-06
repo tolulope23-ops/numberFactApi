@@ -57,15 +57,18 @@ const isDigitSum = (number) => {
     return number < 0 ? -digitArray : digitArray;
 }
 
+const funFact = (number) => {}
+
 
 app.get('/api/classify-number', async(req, res) => {
     const number = Number(req.query.num);
         if(!Number.isInteger(number)){
             return res.status(400).json({
-                number: req.query.num,
+                number: number,
                 error: true
             })
         }
+
         const properties = [];
 
         if(isArmstrong(number))
@@ -75,7 +78,7 @@ app.get('/api/classify-number', async(req, res) => {
     try {
         const response = await fetch(`http://numbersapi.com/${number}/math?json`);
         const data = await response.json();
-        
+
         const result = {
             number: req.query.num,
             is_prime: isPrime(number),
