@@ -10,7 +10,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 app.get('/api/classify-number', async(req, res) => {
-    const number = (req.query.num);
+    const number = (req.query.number);
     if(!number){
         return res.status(StatusCodes.BAD_REQUEST).json({
             number:null,
