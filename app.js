@@ -57,43 +57,59 @@ const isDigitSum = (number) => {
     return number < 0 ? -digitArray : digitArray;
 }
 
-const funFact = (number) => {}
+//Helper function for funFact numbers
+const getFunFact = async(number) => {
+    try {
+        const response = await fetch(`http://numbersapi.com/${number}/math?json`);
+        const data = await response.json();
+        return data.text;
+    } catch (error) {
+        return `Interesting fact about ${number} could not be fetched`;
+    }
+}
 
 
 app.get('/api/classify-number', async(req, res) => {
-    const number = Number(req.query.num);
-        if(!Number.isInteger(number)){
-            return res.status(400).json({
-                number: number,
-                error: true
-            })
-        }
+    const number = (req.query.num);
+    if(!number){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            number:null,
+            error: true
+        })
+    }
+console.log(number);
 
+    const num  = Number(number);
+    console.log(num);
+    
+    if(isNaN(num)){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            number:number,
+            error: true
+        })
+    }
         const properties = [];
-
         if(isArmstrong(number))
             properties.push("armstrong");
         properties.push(number % 2 === 0 ? "even" : "odd");
 
     try {
-        const response = await fetch(`http://numbersapi.com/${number}/math?json`);
-        const data = await response.json();
-
+        const funFact = await getFunFact(num)
         const result = {
-            number: req.query.num,
-            is_prime: isPrime(number),
-            is_perfect: isPerfect(number),
+            number: num,
+            is_prime: isPrime(num),
+            is_perfect: isPerfect(num),
             properties,
-            digit_sum: isDigitSum(number),
-            fun_fact: data.text
+            digit_sum: isDigitSum(num),
+            fun_fact: funFact
         }
 
         res.status(200).json(result);
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({
-                number: req.query.num,
-                error: true
-            })
+            number: num,
+            error: true
+        })
     }
  
 });
