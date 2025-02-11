@@ -1,55 +1,77 @@
 const express = require('express');
 const app = express();
-const cors = require('cors');
-const { StatusCodes } = require('http-status-codes');
-const {isPrime, isPerfect, isArmstrong, getFunFact, isDigitSum} = require('./utils/numberFunctions')
+const cors = require('cors'); 
+const { StatusCodes } = require('http-status-codes'); // Import HTTP status codes for better readability
 
+// Import utility functions for number classifications and fun facts
+const { isPrime, isPerfect, isArmstrong, getFunFact, isDigitSum } = require('./utils/numberFunctions');
+
+// Enable CORS to allow requests from different origins
 app.use(cors());
-app.use(express.json());
+
+// Middleware to parse incoming JSON requests
+app.use(express.json()); 
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/api/classify-number', async(req, res) => {
-    const number = (req.query.number);
-    if(!number){
+// Route to classify a number and return its properties
+app.get('/api/classify-number', async (req, res) => {
+    const number = req.query.number; // Retrieve the 'number' query parameter from the request
+
+    // Check if a number is provided in the request
+    if (!number) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-            number:null,
+            number: null,
             error: true
-        })
+        });
     }
 
-    const num  = Number(number);  
-    if(isNaN(num)){
+    // Convert the string input to a number
+    const num = Number(number);
+
+    // Validate that the input is a number
+    if (isNaN(num)) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-            number:number,
+            number: number,
             error: true
-        })
+        });
     }
-        const properties = [];
-        if(isArmstrong(number))
-            properties.push("armstrong");
-        properties.push(number % 2 === 0 ? "even" : "odd");
+
+    const properties = []; // Initialize an array to store number properties
+
+    // Check if the number is an Armstrong number
+    if (isArmstrong(number)) {
+        properties.push("armstrong");
+    }
+
+    // Check if the number is even or odd
+    properties.push(number % 2 === 0 ? "even" : "odd");
 
     try {
-        const funFact = await getFunFact(num)
+        // Fetch a fun fact about the number
+        const funFact = await getFunFact(num);
+
+        // Construct the response object with various properties
         const result = {
             number: num,
             is_prime: isPrime(num),
             is_perfect: isPerfect(num),
             properties,
             digit_sum: isDigitSum(num),
-            fun_fact: funFact
-        }
+            fun_fact: funFact // Retrieve a fun fact about the number
+        };
 
-        res.status(200).json(result);
+        res.status(StatusCodes.OK).json(result); // Send a successful response with number details
     } catch (error) {
+        // Handle errors and send a bad request response
         res.status(StatusCodes.BAD_REQUEST).json({
             number: num,
             error: true
-        })
-    } 
+        });
+    }
 });
 
-app.listen(PORT, () =>{
+// Start the server and listen for incoming requests
+app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
-})
+});
